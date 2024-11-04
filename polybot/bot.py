@@ -71,23 +71,23 @@ class Bot:
 class ObjectDetectionBot(Bot):
     def handle_message(self, msg):
         logger.info(f'Incoming message: {msg}')
-
+        chat_id = msg['chat']['id']
         if self.is_current_msg_photo(msg):
             photo_path = self.download_user_photo(msg)
 
-            chat_id = msg['chat']['id']
-
             # TODO upload photo_path to S3
-            bucket_name = ...
-            image_name = ...
+            s3 = boto3.client('s3')
+            bucket_name = "shachar-polybot-image-bucket"
+            image_name = os.path.basename(photo_path)
+            s3.upload_file(photo_path,bucket_name, image_name)
             logger.info(f'Image {image_name} uploaded to S3 bucket {bucket_name}.')
 
             self.send_text(chat_id, "Image successfully uploaded to S3.")
 
             # TODO send a job to the SQS queue
 
-            sqs_client = ...
-            queue_url = ...
+            sqs_client = boto3.client('sqs', region_name='eu-north-1')
+            queue_url = "https://sqs.eu-north-1.amazonaws.com/851725395728/polybot-queue"
 
             # Create message body
             message_body = {
@@ -101,3 +101,5 @@ class ObjectDetectionBot(Bot):
             )
             logger.info(f'Message sent to SQS queue with response: {response}')
             self.send_text(chat_id, "Your image is being processed. Please wait...")
+        else:
+            self.send_text(chat_id, "Hi, How can u help you?")
