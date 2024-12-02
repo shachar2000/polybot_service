@@ -26,7 +26,7 @@ jobs:
           aws configure set region "${{secrets.AWS_SECRET_REGION}}"
 
 
-      - name: Create Infrastructures
+      - name: Create Infrastructures and inventory file from output
         run: |
           cd tf
           terraform init
@@ -35,10 +35,7 @@ jobs:
           polybot2_ip=$(terraform output -raw polybot2_public_ip)
           echo $polybot1_ip
           echo $polybot2_ip
-
-      - name: Create inventory file
-        run: |
-          cd tf
+          
           touch inventory.txt
           echo "[polybot]" > inventory.txt
           echo "polybot1 ansible_host=$polybot1_ip ansible_user=ubuntu" >> inventory.txt
