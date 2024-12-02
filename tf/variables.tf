@@ -48,6 +48,11 @@ variable "instance_type" {
    type        = string
 }
 
+variable "yolo5_type" {
+   description = "target group name"
+   type        = string
+}
+
 variable "key_name" {
    description = "target group name"
    type        = string

@@ -265,11 +265,14 @@ resource "aws_instance" "polybot1" {
   subnet_id   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
   iam_instance_profile         = aws_iam_instance_profile.polybot_instance_profile.name
-  user_data = file("./deploy.sh")
   tags = {
     Name = "polybot1"
   }
 }
+output "polybot1_public_ip" {
+  value = aws_instance.polybot1.public_ip
+}
+
 
 resource "aws_instance" "polybot2" {
   ami             = var.instance_ami
@@ -280,10 +283,13 @@ resource "aws_instance" "polybot2" {
   subnet_id   = module.vpc.public_subnets[1]
   associate_public_ip_address = true
   iam_instance_profile         = aws_iam_instance_profile.polybot_instance_profile.name
-  user_data = file("./deploy.sh")
   tags = {
     Name = "polybot2"
   }
+}
+
+output "polybot2_public_ip" {
+  value = aws_instance.polybot2.public_ip
 }
 
 resource "aws_lb_target_group_attachment" "attachment1" {
@@ -298,51 +304,10 @@ resource "aws_lb_target_group_attachment" "attachment2" {
   port             = 8443
 }
 
-resource "aws_security_group" "yolo5_sg" {
-  name        = "yolo5-security-group"
-  description = "Allow SSH and HTTP access"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-   ingress {
-    from_port   = 8443
-    to_port     = 8443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_launch_template" "yolo5_template" {
   name_prefix   = "yolo5-template-"
   image_id      = var.instance_ami
-  instance_type = var.instance_type
+  instance_type = var.yolo5_type
 
   iam_instance_profile {
     name = aws_iam_instance_profile.polybot_instance_profile.name
@@ -368,7 +333,7 @@ resource "aws_launch_template" "yolo5_template" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups = [aws_security_group.yolo5_sg.id]
+    security_groups = [aws_security_group.instance_sg.id]
   }
 }
 
