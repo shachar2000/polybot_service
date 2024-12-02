@@ -33,16 +33,17 @@ jobs:
           terraform apply -var-file region.eu-north-1.tfvars -auto-approve
           polybot1_ip=$(terraform output -raw polybot1_public_ip)
           polybot2_ip=$(terraform output -raw polybot2_public_ip)
-          echo $polybot1_ip
-          echo $polybot2_ip
+          echo "polybot1_ip=$polybot1_ip" >> $GITHUB_ENV
+          echo "polybot2_ip=$polybot2_ip" >> $GITHUB_ENV
 
-      - name: Create inventory file
+      - name: Create inventory file from output
         run: |
+          cd ansible
           touch inventory.txt
-          echo "[polybot servers]" > inventory.txt
+          echo "[polybot]" > inventory.txt
           echo "polybot1 ansible_host=$polybot1_ip ansible_user=ubuntu" >> inventory.txt
           echo "polybot2 ansible_host=$polybot2_ip ansible_user=ubuntu" >> inventory.txt
-          mv inventory.txt ../ansible
+          cat inventory.txt
 
       - name: Install Ansible
         run: |
@@ -54,7 +55,11 @@ jobs:
 
       - name: Run Ansible Playbook
         run: |
-          cd ../ansible
-          echo "${{secrets.KEY_PEM}}" > key.pem
-          sudo chmod 400 key.pem
-          ansible-playbook -i inventory.txt --private-key key.pem playbook.yml
+          cd ansible
+          echo "${{secrets.KEY_PEM}}" > 10-9-2024-ec2.pem
+          sudo chmod 400 10-9-2024-ec2.pem
+          ssh -o StrictHostKeyChecking=no -i 10-9-2024-ec2.pem ubuntu@$polybot1_ip "whoami"
+          ssh -o StrictHostKeyChecking=no -i 10-9-2024-ec2.pem ubuntu@$polybot2_ip "whoami"
+          ansible-inventory -i inventory.txt --list
+          ls
+          ansible-playbook -i inventory.txt --private-key 10-9-2024-ec2.pem playbook.yml

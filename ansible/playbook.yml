@@ -1,13 +1,13 @@
 ---
 - name: Install and configure Docker with Polybot container
-  hosts: polybot  # מכונת יעד או קבוצה של מכונות
-  become: true  # להריץ את כל הפעולות עם הרשאות root
+  hosts: polybot
+  become: true
   tasks:
 
     - name: Update apt package index
       apt:
         update_cache: yes
-        cache_valid_time: 3600  # זמן תוקף של המטמון (בשניות)
+        cache_valid_time: 3600
 
     - name: Install Docker
       apt:
