@@ -60,4 +60,6 @@ jobs:
           sudo chmod 400 10-9-2024-ec2.pem
           ssh -o StrictHostKeyChecking=no -i 10-9-2024-ec2.pem ubuntu@$polybot1_ip "whoami"
           ssh -o StrictHostKeyChecking=no -i 10-9-2024-ec2.pem ubuntu@$polybot2_ip "whoami"
+          ansible-inventory -i inventory.txt --list
+          ls
           ansible-playbook -i inventory.txt --private-key key.pem playbook.yml
