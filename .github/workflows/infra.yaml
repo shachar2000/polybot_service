@@ -33,9 +33,6 @@ jobs:
           terraform apply -var-file region.eu-north-1.tfvars -auto-approve
           polybot1_ip=$(terraform output -raw polybot1_public_ip)
           polybot2_ip=$(terraform output -raw polybot2_public_ip)
-          
-          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$polybot1_ip "whoami"
-          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$polybot2_ip "whoami"
 
           touch inventory.txt
           echo "[polybot]" > inventory.txt
@@ -57,4 +54,6 @@ jobs:
           cd ansible
           echo "${{secrets.KEY_PEM}}" > key.pem
           sudo chmod 400 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$polybot1_ip "whoami"
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$polybot2_ip "whoami"
           ansible-playbook -i inventory.txt --private-key key.pem playbook.yml
