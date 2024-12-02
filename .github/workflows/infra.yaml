@@ -26,14 +26,18 @@ jobs:
           aws configure set region "${{secrets.AWS_SECRET_REGION}}"
 
 
-      - name: Create Infrastructures and inventory file from output
+      - name: Create Infrastructures
         run: |
           cd tf
           terraform init
           terraform apply -var-file region.eu-north-1.tfvars -auto-approve
           polybot1_ip=$(terraform output -raw polybot1_public_ip)
           polybot2_ip=$(terraform output -raw polybot2_public_ip)
-
+          export polybot1_ip
+          export polybot2_ip
+          
+      - name: Create inventory file from output
+        run: |
           touch inventory.txt
           echo "[polybot]" > inventory.txt
           echo "polybot1 ansible_host=$polybot1_ip ansible_user=ubuntu" >> inventory.txt
@@ -52,9 +56,8 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           cd ansible
-          ls
-          cat inventory.txt
           echo "${{secrets.KEY_PEM}}" > 10-9-2024-ec2.pem
-          cat 10-9-2024-ec2.pem
           sudo chmod 400 10-9-2024-ec2.pem
+          ssh -o StrictHostKeyChecking=no -i 10-9-2024-ec2.pem ubuntu@$polybot1_ip "whoami"
+          ssh -o StrictHostKeyChecking=no -i 10-9-2024-ec2.pem ubuntu@$polybot2_ip "whoami"
           ansible-playbook -i inventory.txt --private-key key.pem playbook.yml
