@@ -38,10 +38,12 @@ jobs:
 
       - name: Create inventory file
         run: |
+          cd tf
           touch inventory.txt
           echo "[polybot servers]" > inventory.txt
           echo "polybot1 ansible_host=$polybot1_ip ansible_user=ubuntu" >> inventory.txt
           echo "polybot2 ansible_host=$polybot2_ip ansible_user=ubuntu" >> inventory.txt
+          cat inventory.txt
           mv inventory.txt ../ansible
 
       - name: Install Ansible
