@@ -3,7 +3,7 @@ name: Infrastructures Deployment
 on:
   push:
     branches:
-      - main
+      - shachar
 
 jobs:
   Build:

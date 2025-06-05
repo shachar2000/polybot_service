@@ -5,7 +5,7 @@ on:
     paths:
       - 'polybot/**'
     branches:
-      - main
+      - shachar
 
 jobs:
   Build:
@@ -16,9 +16,11 @@ jobs:
 
       - name: Build and push image
         run: |
+          # TODO your implementation here.... 
           cd polybot
-          
-          # TODO your implementation here....          
+          docker build -t . polybot
+          docker tag polybot shacharavraham/polybot
+          docker push shacharavraham/polybot
 
   Deploy:
     runs-on: ubuntu-latest
@@ -30,5 +32,13 @@ jobs:
         uses: actions/checkout@v2
       - name: Deploy new version
         run: |         
-          # TODO your implementation here....     
-     
+          # TODO your implementation here....
+          cd tf
+          terraform init
+          terraform apply -var-file region.eu-north-1.tfvars
+          polybot1_ip=$(terraform output -raw polybot1_public_ip)
+          polybot2_ip=$(terraform output -raw polybot2_public_ip)
+          cd ../ansible
+          sed -i "s/\(polybot1 ansible_host=\)[^ ]*/\1$polybot1_ip/" inventory.txt
+          sed -i "s/\(polybot2 ansible_host=\)[^ ]*/\1$polybot2_ip/" inventory.txt
+          ansible-playbook -i inventory.txt playbook.yml
