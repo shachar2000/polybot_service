@@ -11,7 +11,7 @@ In addition, the project demonstrates advanced DevOps capabilities, including:
 
 # Architecture
 
-![][botaws3]
+![Architecture](Photos/Architecture.png)
 
 ---
 
@@ -80,4 +80,4 @@ This project demonstrates how to combine multiple technologies: Terraform for in
 
 Once these steps are completed, you can run the project, and the bot will automatically detect objects in images sent to it via Telegram.
 
----
+---yy
